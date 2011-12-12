@@ -96,25 +96,7 @@ if(!class_exists('mysql_import_admin')) :
 			endif;
 			
 			dbDelta($sql);
-		}
-		
-		
-		//cron functions
-		function db_object(){
-			$wpdb = new wpdb(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
-			return $wpdb;
-		}
-		
-		function mime($a){
-			$mimtypes = array('jpg','jpeg');
-			$b = preg_replace('/\w.+\//','',$a);
-			$b = preg_replace('/[^0-9a-zA-Z.]/','',$b);			
-			$c = explode('.',$b);			
-			if(in_array($c[1],$mimtypes)){
-				$c[1] = 'jpeg';
-			}
-			return $c;
-		}
+		}	
 		
 	}
 	

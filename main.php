@@ -13,6 +13,7 @@ define('MYSQLIMPORT', dirname(__FILE__));
 define('MYSQLIMPORT_CLASS', MYSQLIMPORT . '/classes');
 define('MYSQLIMPORT_CORE', MYSQLIMPORT . '/cores');
 
+include MYSQLIMPORT_CLASS . '/utilities.php';
 include MYSQLIMPORT_CLASS . '/admin-panel.php';
 
 ?>

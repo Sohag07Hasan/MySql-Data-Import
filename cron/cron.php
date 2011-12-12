@@ -5,7 +5,7 @@
 
 include '../../../../wp-load.php';
 
-global $wpdb, $mysql_cron;
+global $wpdb, $cron_utility;
 $cracking_table = $wpdb->prefix . 'cron';
 
 
@@ -28,13 +28,25 @@ mysql_close($link);
 
 //instantiating the wpdb database again
 unset($wpdb);
-$wpdb = $mysql_cron->db_object();
+$wpdb = $cron_utility->db_object();
 
 foreach($cars as $car){
-	$taxanomies = array(
-		
-	);
+	$equipments = @ unserialize($car['equipment']);
+	$engine = array($cron_utility->engine($car['engine']));
+	$price_range = $cron_utility->pricerange($car['pricerange']);
+	var_dump($price_range);
+	exit;
 	
+	/*
+	$taxanomies = array(
+		'features' => $equipments,
+		'enginesize' => $engine,
+		'transmission' => array($car['transmission']),
+		'pricerange' => '',
+		'bodytype' => '',
+		'modelyear' => '',
+		'mileage' =>	''	
+	);
 	
 	$data = array(
 				'post_type' =>'listing',
@@ -50,7 +62,7 @@ foreach($cars as $car){
 	
 	$attachments = unserialize($car['images']);
 	foreach ($attachments as $attachment){
-		$mime = $mysql_cron->mime($attachment);
+		$mime = $cron_utility->mime($attachment);
 		$a_data = array(
 				'post_type' =>'attachment',
 				'post_title' => $mime[0],
@@ -60,4 +72,5 @@ foreach($cars as $car){
 				'guid' => $attachment
 		);
 	}
+	*/
 }
