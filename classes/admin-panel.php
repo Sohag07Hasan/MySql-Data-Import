@@ -9,6 +9,14 @@ if(!class_exists('mysql_import_admin')) :
 		function __construct(){
 			add_action('admin_menu',array($this,'optionspage'));
 			register_activation_hook(MYSQLIMPORT_FILE,array($this,'table_creation'));
+			add_action('deleted_post',array($this,'delete_post'));
+		}
+		
+		//if the post is deleted this function triggers
+		function delete_post($post_id){
+			global $wpdb;
+			$cracking_table = $wpdb->prefix . 'cron';
+			$wpdb->query($wpdb->prepare("DELETE FROM $cracking_table WHERE p_id = %d", $post_id));
 		}
 		
 		//options page
@@ -23,23 +31,38 @@ if(!class_exists('mysql_import_admin')) :
 			}
 			
 			$data = get_option('cron_information');
+			$ftp = get_option('cron_ftp');
+			
+			if($_POST['free_the_cron_table'] == 'Y'){
+				global $wpdb;
+				$cracking_table = $wpdb->prefix . 'cron';
+				$wpdb->query("DELETE FROM $cracking_table");
+			}
 			
 		?>
 		
 			<div class="wrap">
 				<?php screen_icon('options-general'); ?>
 				
-				<h2>MySql Details</h2>
+				<h2>MySql & FTP Details</h2>
 				<?php 
 					if($_POST['mysql_information_submit'] == 'Y'){
 						echo '<div class="updated"><p>Saved</p></div>';
+					}
+					
+					if($_POST['free_the_cron_table'] == 'Y'){
+						echo '<div class="updated"><p>Tracking Table is now clean</p></div>';
 					}
 				?>
 				
 				<form action="" method="post">
 					<input type="hidden" name="mysql_information_submit" value="Y" />								
 					<table class="form-table">
-					
+							
+							<tr>
+								<td colspan="3"> <h2>MySql Information</h2> </td>
+							</tr>
+							
 							<tr valign="top"><th scope="row">MYSQL SERVER (localhost:port) </th>
 							
 								<td colspan="2"><input style="width:400px" name="mysql_information[server]" type="text" value= "<?php echo $data['server']; ?>" /></td>												
@@ -65,6 +88,34 @@ if(!class_exists('mysql_import_admin')) :
 								<td colspan="2"><input style="width:400px" name="mysql_information[password]" type="text" value= "<?php echo $data['password']; ?>" /></td>												
 							</tr>
 							
+							<tr>
+								<td colspan="3"> <h2>FTP Information (under construction)</h2> </td>
+							</tr>
+							
+							<tr valign="top"><th scope="row">FTP SERVER </th>
+							
+								<td><input style="width:400px" name="ftp_information[server]" type="text" value= "<?php echo $ftp['server']; ?>" /></td>												
+							</tr>
+							
+							<tr valign="top"><th scope="row">FTP USER </th>
+							
+								<td><input style="width:400px" name="ftp_information[user]" type="text" value= "<?php echo $ftp['user']; ?>" /></td>												
+							</tr>
+							<tr valign="top"><th scope="row">FTP password </th>
+							
+								<td><input style="width:400px" name="ftp_information[password]" type="text" value= "<?php echo $ftp['password']; ?>" /></td>												
+							</tr>
+							<tr>
+								<td colspan="3"> Please Insert wp-content direcotory relative to ftp root directory (".../wp-content") pls see the screenshots attached &nbsp <a href= "<?php echo plugins_url('/imdb-scraping-easy/screenshots/screenshots.png'); ?>" target="_blank">screenshots</a> </td>
+								
+							</tr>
+							<tr valign="top"><th scope="row">FTP Path </th>
+							
+								<td colspan="3"> <input style="width:400px" name="ftp_information[path]" type="text" value= "<?php echo $ftp['path']; ?>" /></td>												
+							</tr>
+							<tr>
+							
+							
 							
 							<tr>
 								<td>
@@ -74,6 +125,19 @@ if(!class_exists('mysql_import_admin')) :
 							
 						</table>
 				</form>
+				
+				<div style="margin-top:20px;"></div>
+				<?php screen_icon('options-general'); ?>
+				<h2>Free Cron Tracking Table</h2>
+				<small>
+					If the mother table is somehow cleared, please clear the cron tracking table. Otherwise every row may not be included into wp database from the mother database
+				</small>
+				
+				<form action="" method="post">
+					<input type="hidden" name="free_the_cron_table" value="Y" />
+					<input class="button-primary" type="submit" name="free" value="free the table" />
+				</form>
+				
 			</div>
 			
 		<?php
