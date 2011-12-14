@@ -20,12 +20,13 @@ $link = mysql_connect($info['server'], $info['user'], $info['password']);
 mysql_select_db($info['db'], $link);
 $table = $info['table'];
 
-$query = "SELECT * FROM $table WHERE `id`>$max ORDER BY `id`";
+$query = "SELECT * FROM $table WHERE id > $max ORDER BY `id` LIMIT 2";
 $result = mysql_query($query);
 $cars = array();
 while ($row = mysql_fetch_assoc($result)) {
   $cars[] = $row;
 }
+
 
 mysql_free_result($result);
 mysql_close($link);
@@ -39,19 +40,21 @@ global $wpdb;
 
 foreach($cars as $car){
 	
+	$attachments = unserialize($car['images']);
+	if(!is_array($attachment)) continue;
+	
 	// all are the taxonomies
 	$equipments = @ unserialize($car['equipment']);
 	if(!$equipments) $equipments = array();
  	$engine = array($cron_utility->engine($car['engine']));
-	$price_range = $cron_utility->pricerange($car['pricerange']);
+	$price_range = $cron_utility->pricerange($car['price']);
 	$model_year = $cron_utility->model_year($car['vehicle_name']);	
-	$mileage = $cron_utility->mileage($car['odometer']);
+	$mileage = $cron_utility->mile($car['odometer']);
 	$audio = $cron_utility->audio_video($car['audio']);
 	$extras = array($car['interior_type']);
 	$manufacturer = array($car['manufacturer']);
-	$features = array_merge($equipments,$audio,$extras,$manufacturer);
-	
-	
+	$features = array_merge($equipments,$audio,$extras);
+		
 	$taxanomies = array(
 		'features' => $features,
 		'enginesize' => $engine,
@@ -59,7 +62,8 @@ foreach($cars as $car){
 		'pricerange' => array($price_range),
 		'bodytype' => array($car['body_type']),
 		'modelyear' => array($model_year),
-		'mileage' => array($mileage)	
+		'mileage' => array($mileage),
+		'manufacturer' => $manufacturer	
 	);
 	
 	$data = array(
@@ -110,7 +114,11 @@ foreach($cars as $car){
 	update_post_meta($p_id,'mileage_value',preg_replace('/[^0-9]/','',$car['odometer']));
 	update_post_meta($p_id,'top_value',$car['top']);
 	update_post_meta($p_id,'vin_value',$car['vin']);
-	update_post_meta($p_id,'manufacturer_level1_value',$car['manufacturer']);
+	update_post_meta($p_id,'manufacturer_level1_value',$cron_utility->manufacturerer($car['manufacturer']));
+	update_post_meta($p_id,'year_value',$cron_utility->model_year_extract($car['vehicle_name']));
+	update_post_meta($p_id,'mmr_value',$car['mmr_details']);
+	update_post_meta($p_id,'blackbook_value',$car['blackbook_details']);
+	update_post_meta($p_id,'end_date_value',$car['end_date']);
 	
 	$wpdb->insert($cracking_table,array('p_id'=>(int)$p_id,'c_id'=>(int)$car['id']),array('%d','%d'));
 	
