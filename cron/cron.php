@@ -20,7 +20,7 @@ $link = mysql_connect($info['server'], $info['user'], $info['password']);
 mysql_select_db($info['db'], $link);
 $table = $info['table'];
 
-$query = "SELECT * FROM $table WHERE id > $max ORDER BY `id` LIMIT 2";
+$query = "SELECT * FROM $table WHERE id > $max ORDER BY `id` ";
 $result = mysql_query($query);
 $cars = array();
 while ($row = mysql_fetch_assoc($result)) {
