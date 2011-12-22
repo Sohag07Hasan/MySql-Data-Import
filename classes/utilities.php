@@ -123,6 +123,23 @@ if(!class_exists('mysql_utilites')):
 			}
 		}
 		
+		//price discounted or more]
+		function price_set($price,$man,$mn_p){
+			$price = preg_replace('/[^0-9]/','',$price);
+			$percent = (isset($mn_p[$man])) ? $mn_p[$man] : 0;			
+			$new_price = $price + $price*$percent/100;
+			return $new_price;			
+		}
+		
+		//price for all
+		function price_set_all($price){
+			$price = preg_replace('/[^0-9]/','',$price);			
+			$percent = get_option('percent_price_level_all');			
+			$percent = ($percent == '') ? 0 : $percent;						
+			$new_price = $price + $price*$percent/100;
+			return round($new_price);			
+		}
+		
 		
 	}
 	

@@ -14,6 +14,27 @@ if(!class_exists('mysql_import_admin')) :
 			add_action('save_post',array($this,'save_post_meta'),50);
 			
 			add_filter('manage_edit-listing_columns',array($this,'remove_thumb'),100);
+			
+			add_filter('primary_manufactuerer_search',array($this,'search_array'));
+		}
+		
+		function search_array($mns){
+			global $wpdb;
+			$new_array = array();
+			$mns = array_unique($mns);
+			foreach($mns as $m){
+				if(!$this->manu_check($m,$wpdb)) continue;
+				$new_array[] = $m; 
+			}
+			sort($new_array);
+			return $new_array;
+		}
+		
+		//check the manufacturer
+		function manu_check($m,$wpdb){
+			$sql = "SELECT meta_id FROM $wpdb->postmeta a INNER JOIN $wpdb->posts b on a.post_id = b.ID WHERE a.meta_value = '$m' AND b.post_type = 'listing' AND b.post_status = 'publish' ";
+			$results = $wpdb->get_var($sql);
+			return $results;
 		}
 		
 		function remove_thumb($cols){
@@ -22,6 +43,7 @@ if(!class_exists('mysql_import_admin')) :
 		}
 		
 		function save_post_meta($p_id){
+			update_post_meta($p_id,'org_price_value',$_REQUEST['org_price_value']);
 			update_post_meta($p_id,'door_value',$_REQUEST['door_value']);
 			update_post_meta($p_id,'driven_train',$_REQUEST['driventrain_value']);
 			update_post_meta($p_id,'vin_value',$_REQUEST['vin_value']);
@@ -33,6 +55,15 @@ if(!class_exists('mysql_import_admin')) :
 			add_meta_box('blackbook_details',__('BlackBook'),array($this,'blackbook'),'listing','normal','high');
 			add_meta_box('mmr_details',__('MMR'),array($this,'mmr'),'listing','normal','high');
 			add_meta_box('end_date',__('End Date'),array($this,'end_date'),'listing','normal','high');
+			add_meta_box('auction_location',__('Auction Location'),array($this,'auction_location'),'listing','normal','high');
+		}
+		
+		//auction l ocation
+		function auction_location(){
+			global $post;
+			echo '<div class="wrap">';
+			echo get_post_meta($post->ID,'location_value',true);
+			echo '</div>';
 		}
 		
 		function end_date(){
@@ -63,6 +94,10 @@ if(!class_exists('mysql_import_admin')) :
 			<div class='wrap'>
 				<table class='form-table'>
 					<tr><th>Meta Key</th> <th>Meta Value</th></tr>
+					<tr>
+						<td>Original Price</td>
+						<td> <input type='text' name="org_price_value" value="<?php echo get_post_meta($post->ID,'org_price_value',true); ?>" /></td>
+					</tr>	
 					<tr>
 						<td>Vin</td>
 						<td> <input type='text' name="vin_value" value="<?php echo get_post_meta($post->ID,'vin_value',true); ?>" /></td>

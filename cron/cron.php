@@ -38,10 +38,12 @@ unset($wpdb);
 $cron_utility->db_object();
 global $wpdb;
 
+$mn_p = get_option('percent_price_level');
+
 foreach($cars as $car){
 	
 	$attachments = unserialize($car['images']);
-	if(!is_array($attachment)) continue;
+	if(!is_array($attachments)) continue;
 	
 	// all are the taxonomies
 	$equipments = @ unserialize($car['equipment']);
@@ -110,7 +112,9 @@ foreach($cars as $car){
 	update_post_meta($p_id,'door_value',$car['door']);
 	update_post_meta($p_id,'driven_train',$car['drive_train']);
 	update_post_meta($p_id,'trans_value',$car['transmission']);
-	update_post_meta($p_id,'price_value',preg_replace('/[^0-9]/','',$car['price']));
+	//update_post_meta($p_id,'price_value',$cron_utility->price_set($car['price'],$car['manufacturer'],$mn_p));
+	update_post_meta($p_id,'price_value',$cron_utility->price_set_all($car['price']));
+	update_post_meta($p_id,'org_price_value',preg_replace('/[^0-9]/','',$car['price']));
 	update_post_meta($p_id,'mileage_value',preg_replace('/[^0-9]/','',$car['odometer']));
 	update_post_meta($p_id,'top_value',$car['top']);
 	update_post_meta($p_id,'vin_value',$car['vin']);
@@ -119,6 +123,7 @@ foreach($cars as $car){
 	update_post_meta($p_id,'mmr_value',$car['mmr_details']);
 	update_post_meta($p_id,'blackbook_value',$car['blackbook_details']);
 	update_post_meta($p_id,'end_date_value',$car['end_date']);
+	update_post_meta($p_id,'location_value',$car['location']);
 	
 	$wpdb->insert($cracking_table,array('p_id'=>(int)$p_id,'c_id'=>(int)$car['id']),array('%d','%d'));
 	
