@@ -10,21 +10,28 @@ if(!class_exists('car_menu_page')) :
 		// constructor
 		function __construct(){
 			add_action('admin_menu', array($this,'create_a_menu'));
-			//add_action('admin_enqueue_scripts',array($this,'css_js'),100);
+			add_action('wp_enqueue_scripts',array($this,'css_js'),100);
 		}
 		
 		//adding javascript and css for media uploader
 		function css_js(){
-			if($_REQUEST['page'] == 'auction_day_set') :
-				wp_enqueue_style('thickbox');
+			global $mysql_cron;		
+			//if(get_option("wp_secondary_manufacturer") == 'Enable') :
+			
 				wp_enqueue_script('jquery');
-				wp_register_script('media_auction_script', MYSQLIMPORT_JS . '/media-uploader.js', array('jquery','media-upload','thickbox'));
+				wp_register_script('media_auction_script', MYSQLIMPORT_JS . '/media-uploader.js', array('jquery'));
 				wp_enqueue_script('media_auction_script');
-			endif;
+				$manufacturer_level1 = get_option('wp_manufacturer_level1');
+				$manufacturer_level1 = $mysql_cron->search_array(explode("\n",$manufacturer_level1));
+				$mns = $mysql_cron->localise_function($manufacturer_level1);		
+				wp_localize_script('media_auction_script','carmodels',$mns);
+			
+		//	endif;
+			
 		}
 		
 		//menu page
-		function create_a_menu(){
+		function create_a_menu(){ 
 					
 			add_menu_page(__('Ove Data Import'),__('Auction Expires'),'activate_plugins','wp_ove_auction',array($this,'acution_lists'));
 			add_submenu_page('wp_ove_auction',__('Auction Expire Set'),__('Auction Time Set'),'activate_plugins','auction_day_set',array($this,'auction_page'));

@@ -124,6 +124,7 @@ foreach($cars as $car){
 	update_post_meta($p_id,'blackbook_value',$car['blackbook_details']);
 	update_post_meta($p_id,'end_date_value',$car['end_date']);
 	update_post_meta($p_id,'location_value',$car['location']);
+	update_post_meta($p_id,'manufacturer_level2_value',$cron_utility->model_manufacturer($car['manufacturer'],$car['model']));
 	
 	$wpdb->insert($cracking_table,array('p_id'=>(int)$p_id,'c_id'=>(int)$car['id']),array('%d','%d'));
 	
