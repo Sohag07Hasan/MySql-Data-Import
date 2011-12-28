@@ -16,6 +16,19 @@ if(!class_exists('mysql_import_admin')) :
 			add_filter('manage_edit-listing_columns',array($this,'remove_thumb'),100);
 			
 			add_filter('primary_manufactuerer_search',array($this,'search_array'));
+			add_filter('secondary_manufactuerer_search',array($this,'search_array_two'));
+		}
+		
+		function search_array_two($mns){
+			global $wpdb;
+			$new_array = array();								
+			foreach($mns as $m){				
+				if(!$this->manu_check($m,$wpdb)) continue;
+				$new_array[] = $m; 
+			}
+			$new_array = array_unique($new_array);
+			sort($new_array);
+			return $new_array;
 		}
 		
 		function search_array($mns){
@@ -38,31 +51,6 @@ if(!class_exists('mysql_import_admin')) :
 			$sql = "SELECT meta_id FROM $wpdb->postmeta a INNER JOIN $wpdb->posts b on a.post_id = b.ID WHERE a.meta_value = '$m' AND b.post_type = 'listing' AND b.post_status = 'publish' ";
 			$results = $wpdb->get_var($sql);
 			return $results;
-		}
-		
-		//json object creation 
-		function localise_function($arr_manufacturer_level1=array()){
-			$json_array = array();
-			foreach($arr_manufacturer_level1 as $man){
-				if($man == '') continue;
-				$id = 'wp_' . preg_replace('/[ ]/','',$man);							
-				$models = get_option($id);
-				if(count($models) < 1) continue;
-				$a = '';
-				
-				foreach($models as $mod){								
-					if($mod == $_REQUEST['manufacturer_level2']){
-						$selected = 'selected="selected"';
-					}
-					else{
-						$selected = '';
-					}								
-					$a .= htmlentities ("<option $selected value='$mod'>$mod</option>");
-					//$a .= '<option value="'.$mod.'" '.$selected.'>' . $mod .'</option>';
-				}
-				$json_array[$id] = $a;				
-			}
-			return $json_array;
 		}
 		
 		function remove_thumb($cols){
